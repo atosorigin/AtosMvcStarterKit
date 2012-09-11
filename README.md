@@ -8,6 +8,9 @@ of reusable functionality. This lowers the chance that for each new project whee
 over again. In addition, the Start Kit features code generation of Repositorories, Controllers and Views to optimize
 productivity.
 
+The Atos MVC Starter Kit is an important component of the Samoa software factory, the software factory of Atos.
+See the Samoa wiki for details of the other components of Samoa: https://wiki.myatos.net/display/SAMOA/Samoa
+
 Solution
 - Pre defined solution with layers for UI, Business, Resource access
 - Projects and project dependencies are preconfigured
