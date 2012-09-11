@@ -1,0 +1,39 @@
+﻿<#@ Template Language="C#" HostSpecific="True" Inherits="DynamicTransform" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="EnvDTE" #>
+<#@ Output Extension="cs" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using <#= Model.ModelTypeNamespace #>;
+
+<# 
+    var modelType = (CodeType)Model.ModelType; 
+    var modelName = modelType.Name;
+	var modelVariableName = modelType.Name.ToLower();
+	var relatedEntities = ((IEnumerable)Model.RelatedEntities).OfType<RelatedEntityInfo>();
+#>
+
+namespace <#= Model.Namespace #>
+{ 
+    public class <#= Model.ViewModelName #> : ViewModelBase
+    {
+		public <#= modelName #> <#= modelName #>  { get; set; }
+<# foreach(var relatedEntity in relatedEntities.Where(x => x.RelationType == RelationType.Parent)) { #>
+		public IEnumerable<<#= relatedEntity.RelatedEntityType.Name#>> Possible<#= relatedEntity.RelationNamePlural #> { get; set; }
+<# } #>
+		
+		public <#= Model.ViewModelName #>(<#= modelName #> <#= modelVariableName #>)
+		{
+		    this.<#= modelName #> = <#= modelVariableName #>;
+		}
+		
+		public <#= Model.ViewModelName #>()
+		{
+		    
+		}
+	}
+}

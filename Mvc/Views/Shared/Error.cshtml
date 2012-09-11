@@ -1,0 +1,25 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Sorry, an error occurred while processing your request.";
+}
+
+<hgroup class="title">
+    <h1 class="error">An error occurred while processing your request.</h1>
+</hgroup>
+
+Sorry, an error has occurred during the processing of your page request. 
+
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+<p>Error: <span class="error">@ViewBag.ErrorMessage</span></p>
+}
+@if (null == Model)
+{
+    @:An unknown error occured (no Model is sent to Error page).
+}
+else
+{ 
+  <p>@Model.Exception.GetType().Name thrown in @Model.ControllerName @Model.ActionName: @Model.Exception.Message</p>
+  <p>@Html.ActionLink("Return to the start page", "", "")</p>
+}

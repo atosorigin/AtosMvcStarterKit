@@ -1,0 +1,8 @@
+If the WebSetup installer is executed on a machine with IIS7, the component "IIS 6 Management Compatibility" must be installed first.
+
+Click on Start > Control Panel > Turn Windows features on or off > Roles. Right-click on Web Server (IIS) and click on Add Role Services.
+Install the component "IIS 6 Management Compatibility" and all sub components.
+
+
+Alexander van Trijffel
+30 August 2010

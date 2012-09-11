@@ -1,0 +1,122 @@
+@{
+    ViewBag.Title = "New Web Application Home Page";
+}
+@section featured {
+    <section class="featured">
+    <div class="content-wrapper">
+        <hgroup class="title">
+            <h1>@ViewBag.Title.</h1>
+            <h2>@ViewBag.Message</h2>
+        </hgroup>
+        <p>
+            To learn more about ASP.NET MVC visit <a href="http://asp.net/mvc" title="ASP.NET MVC Website">http://asp.net/mvc</a>. 
+            The page features <span class="highlight">videos, tutorials, and samples</span> to help you get the most from 
+            ASP.NET MVC. If you have any questions about ASP.NET MVC visit 
+            <a href="http://forums.asp.net/1146.aspx/1?MVC" title="ASP.NET MVC Forum">our forums</a>.
+        </p>
+    </div>
+</section>
+}
+
+<section class="StarterKitIntro">
+
+<p>
+    Thank you for using the Atos Enterprise Web Application Starter Kit.</p>
+<p>
+    The starter kit offers out of the box support for error handling with Elmah and
+    Log4Net. All unhandled exceptions are displayed on the <a href="~/elmah.axd">Elmah error
+        page</a>. All messages are logged to the file LogFiles/MvcWebApplication.log
+    as configured in /log4net.config.
+</p>
+<h3>Other features:</h3>
+<ol>
+    <li>Solution structure with projects, folders, references. Pre configuration of configuration files, bundles, application startup.</li>
+    <li>Drop down menu based on sitemap with authorization on menu items</li>
+    <li>Authentication and Authorization for securing actions. See <a href="@Url.Admin()">Admin</a> for an example.</li>
+    <li>Inversion of control with StructureMap</li>
+    <li>Logging with Log4Net</li>
+    <li>Support for EntityFramework and NHibernate</li>
+    <li>BaseController, BaseWebViewPage classes</li>
+    <li>UrlHelper examples for referring to images and actions</li>
+    <li>Application version on master page template</li>
+    <li>ActionResultMessage view for displaying simple messages. <a href="@Url.ActionResultMessageExample()">Example</a></li>
+    <li>Error handling with elmah, log4net. See example of an <a href="@Url.ErrorHandlingExample()">action that throws an error</a>. The error details are displayed on the <a href="~/elmah.axd">Elmah error
+                                                                                                                                                                                 page</a> and the log file LogFiles/MvcWebApplication.log.</li>
+    <li>Log requests with the [LogRequest] attribute</li>
+</ol>
+<h3>
+    What's next?</h3>
+<ol>
+    <li>Rename the solution title and file name to your project name</li>
+    <li>Rename the namespace prefix Customer.Project in all project properties and class
+        files</li>
+    <li>Change the default page title in WebApplication\Site.Master</li>
+    <li>Add Business Entity classes to the Domain project</li>
+    <li>For each Business Entity, add one public and one internal interface repository interface
+        to RepositoryInterfaces and RepositoryInterfaces\Int folder respectively. The public
+        Repository interface is supposed to contain Get operations and the internal Repository
+        interface should contain Save & Delete operations.</li>
+    <li>For each Business Entity, add a repository class to DataAccess\Repositories</li>
+    <li>If you need in-memory data for test purposes, add a repository class to InMemoryTestData\Repositories
+        for each Business Entity</li>
+    <li>For each public repository interface, add a property to Business Logic\AppContext</li>
+    <li>For each internal repository interface, add a property to Business Logic\AppContextInt</li>
+    <li>For each repository interface, add a Unity mapping from the interface to the implementation
+        class in web.config in section configuration/unity/containers/container/types</li>
+    <li>For each repository interface, add a Provider class to Application\Provider</li>
+    <li>For each Business Entity, add a Web Form in the WebApplication project</li>
+</ol>
+</section>
+<h3>
+    We suggest the following:</h3>
+<ol class="round">
+    <li class="one">
+        <h5>
+            Configure ASP.NET Membership</h5>
+        ASP.NET membership gives you a built-in way to create, store, and validate user
+        credentials (authentication). By default, membership works with a local instance
+        of SQL Server, but you can configure it to use another database. </li>
+    <li class="two">
+        <h5>
+            Add NuGet packages and jump start your coding</h5>
+        NuGet makes it easy to install and update free libraries and tools in Visual Studio.
+        In <em>Solution Explorer</em>, right-click the <em>References</em> node, select
+        <em>Manage NuGet Packages</em>, and then pick from the extensive list of packages.
+    </li>
+    <li class="three">
+        <h5>
+            Setup deployment to your web server</h5>
+        Use Microsoft Web Deploy to quickly and easily publish your application to a web
+        server. In <em>Solution Explorer</em>, right-click your project, select <em>Publish</em>,
+        and choose one of the many options to get your code deployed and running on the
+        web. </li>
+</ol>
+<section class="features">
+    <section class="feature">
+        <img src="@Url.Image("aspNetHome.png")" alt="" />
+        <h3>Home of ASP.NET</h3>
+        <p>
+            ASP.NET is a free, fully supported Web application framework that helps you create standards-based web solutions. 
+            Whether you're new to ASP.NET or an experienced developer, the <a href="http://asp.net">ASP.NET website</a> 
+            is your source for news, training, downloads, and support.
+        </p>
+    </section>
+    <section class="feature">
+        <img src="@Url.Image("NuGetGallery.png")" alt="" />
+        <h3>NuGet Gallery</h3>
+        <p>
+            NuGet is a Visual Studio extension that makes it easy to install and update open source libraries and tools in 
+            Visual Studio. To see available packages, visit the <a href="http://nuget.org">NuGet gallery</a>.
+            You can also develop your own package and share it in the gallery.
+        </p>
+    </section>
+    <section class="feature">
+        <img src="@Url.Image("findHosting.png")" alt="" />
+        <h3>Find Web Hosting</h3>
+        <p>
+            You can easily find a web hosting company that offers the right mix of features and price for your applications. 
+            Visit <a href="http://microsoft.com/web/hosting" title="Microsoft/Web Website">Microsoft.com/web</a> to 
+            explore offerings from many providers.
+        </p>
+    </section>
+</section>

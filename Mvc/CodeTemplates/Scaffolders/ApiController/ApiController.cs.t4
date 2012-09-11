@@ -1,0 +1,190 @@
+﻿<#@ template language="C#" HostSpecific="True"  inherits="DynamicTransform" #>
+<#@ Output Extension="cs" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="EnvDTE" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+<# if(!string.IsNullOrEmpty(Model.ModelTypeNamespace)) { #>
+using <#= Model.ModelTypeNamespace #>;
+<# } #>
+using <#= Model.RepositoriesNamespace #>;
+using <#= Model.RepositoryInterfacesNamespace #>;
+
+namespace <#= Model.ControllerNamespace #>
+{   
+<#  
+	var modelType = (CodeType)Model.ModelType; 
+	var modelName = modelType.Name; 
+	var modelNamePlural = Model.ModelTypePluralized; 
+	var modelVariable = modelName.ToLower(); 
+	var relatedEntities = ((IEnumerable)Model.RelatedEntities).OfType<RelatedEntityInfo>();
+	var primaryKeyProperty = modelType.VisibleMembers().OfType<CodeProperty>().Single(x => x.Name == Model.PrimaryKey);
+	var routingName = Regex.Replace(Model.ControllerName, "Controller$", "", RegexOptions.IgnoreCase);
+#>
+    public partial class <#= Model.ControllerName #> : ApiControllerBase
+    {
+<# foreach(var repository in Repositories.Values) { #>
+		private readonly I<#= repository.RepositoryTypeName #> _<#= repository.VariableName #>;
+<# } #>
+
+		// If you are not using Dependency Injection, uncomment the following constructor
+        public <#= Model.ControllerName #>() : this(<#= String.Join(", ", Repositories.Values.Select(x => "new " + x.RepositoryTypeName + "()")) #>)
+        { }
+
+        public <#= Model.ControllerName #>(<#= String.Join(", ", Repositories.Values.Select(x => "I" + x.RepositoryTypeName + " " + x.VariableName)) #>)
+        {
+<# foreach(var repository in Repositories.Values) { #>
+			this._<#= repository.VariableName #> = <#= repository.VariableName #>;
+<# } #>
+        }
+		
+		// GET /api/<#= modelNamePlural.ToLower() #>api
+        public IEnumerable<<#= modelName #>> Get()
+        {		
+		<#
+	var propertiesToInclude = relatedEntities.Select(relation => relation.LazyLoadingProperty).Where(x => x != null);
+	var includeExpression = String.Join(", ", propertiesToInclude.Select(x => String.Format("{0} => {0}.{1}", modelVariable, x.Name)));
+	if (!string.IsNullOrEmpty(includeExpression)) {
+		includeExpression = "Including(" + includeExpression + ")";
+	}
+#>
+	// var all<#= modelNamePlural #> = _<#= Repositories[modelType.FullName].VariableName #>.All<#= includeExpression #>;
+            return _<#= Repositories[modelType.FullName].VariableName #>.All.ToList();
+        }
+		
+		 // GET /api/<#= modelNamePlural.ToLower() #>api/5
+        public <#= modelName #> Get(<#= primaryKeyProperty.Type.AsString #> id)
+        {
+            var <#= modelVariable #> = _<#= Repositories[modelType.FullName].VariableName #>.Find(id);
+            if (<#= modelVariable #> == null)
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            return <#= modelVariable #>;
+        }
+		
+         // POST /api/<#= modelNamePlural.ToLower() #>api/<#= modelVariable #>Ids=1,2,3
+        public IEnumerable<<#= modelName #>> Post(IEnumerable<int> <#= modelVariable #>Ids)
+        {
+            return _<#= Repositories[modelType.FullName].VariableName #>.Find(<#= modelVariable #>Ids).ToList();
+        }
+		
+		// returning anonymous types in MVC4 RC
+        /*
+        public HttpResponseMessage Get()
+        {
+            return this.Request.CreateResponse(
+                HttpStatusCode.OK,
+                new { Message = "Hello", Value = 123 });
+        }
+         */
+
+		// POST /api/<#= modelNamePlural.ToLower() #>api
+        public HttpResponseMessage<<#= modelName #>> Post(<#= modelName #> <#= modelVariable #>)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    //var validationResult = ValidatorEx.ValidateObject(person);
+                    //if (validationResult.IsValid)
+
+                    _<#= Repositories[modelType.FullName].VariableName #>.InsertOrUpdate(<#= modelVariable #>);
+                    _<#= Repositories[modelType.FullName].VariableName #>.Save();
+
+                    //Created!
+                    var response = new HttpResponseMessage<<#= modelName #>>(<#= modelVariable #>, HttpStatusCode.Created);
+
+                    //Let them know where the new <#= modelName #> is
+                    string uri = Url.Route(null, new { id = <#= modelVariable #>.Id });
+                    response.Headers.Location = new Uri(Request.RequestUri, uri);
+
+                    return response;
+                    // return "OK";
+                }
+                else
+                {
+                    throw new HttpResponseException(HttpStatusCode.BadRequest);
+
+                    //return validationResult.ValidationMessagesToString();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                //return string.Format("Save item failed ({0}).", ex.Message);
+                throw new HttpResponseException(HttpStatusCode.InternalServerError);
+            }
+        }
+
+        // PUT /api/<#= modelNamePlural.ToLower() #>api/5
+        public string Put(<#= primaryKeyProperty.Type.AsString #> id, <#= modelName #> <#= modelVariable #>)
+        {
+            try
+            {
+				//var validationResult = ValidatorEx.ValidateObject(<#= modelVariable #>);
+                //if (validationResult.IsValid)
+			 	if (ModelState.IsValid)
+                {
+                    _<#= Repositories[modelType.FullName].VariableName #>.InsertOrUpdate(<#= modelVariable #>);
+                    _<#= Repositories[modelType.FullName].VariableName #>.Save();
+                    return "OK";
+                    // return new HttpResponseMessage(HttpStatusCode.NoContent);
+                }
+                else
+                {
+					return string.Join(",", ModelState.Select(x => x.Value));
+					// return validationResult.ValidationMessagesToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                return string.Format("Save item failed ({0}).", ex.Message);
+            }
+        }
+
+        // DELETE /api/<#= modelNamePlural.ToLower() #>api/5
+        public string Delete(<#= primaryKeyProperty.Type.AsString #> id)
+        {
+            try
+            {
+                _<#= Repositories[modelType.FullName].VariableName #>.Delete(id);
+                _<#= Repositories[modelType.FullName].VariableName #>.Save();
+                return "OK";
+            }
+            catch (Exception ex)
+            {
+                return string.Format("Delete item failed ({0}).", ex.Message);
+                //throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+        }
+    }
+}
+
+<#+
+class RepositoryInfo {
+    public string RepositoryTypeName { get; set; }
+    public string VariableName { get; set; }
+}
+
+IDictionary<string, RepositoryInfo> _repositories;
+IDictionary<string, RepositoryInfo> Repositories {
+	get {
+		if (_repositories == null) {
+			var relatedEntities = ((IEnumerable)Model.RelatedEntities).OfType<RelatedEntityInfo>();
+			var relatedTypes = relatedEntities.Where(x => x.RelationType == RelationType.Parent).Select(x => x.RelatedEntityType).Distinct();
+			_repositories = relatedTypes.ToDictionary(
+				relatedType => relatedType.FullName,
+				relatedType => new RepositoryInfo { RepositoryTypeName = relatedType.Name + "Repository", VariableName = relatedType.Name.ToLower() + "Repository" }
+			); 
+			_repositories[((CodeType)Model.ModelType).FullName] = new RepositoryInfo { RepositoryTypeName = Model.Repository, VariableName = ((CodeType)Model.ModelType).Name.ToLower() + "Repository" };
+		}
+		return _repositories;
+	}
+}
+#>

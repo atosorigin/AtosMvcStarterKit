@@ -1,0 +1,248 @@
+﻿<#@ template language="C#" HostSpecific="True"  inherits="DynamicTransform" #>
+<#@ Output Extension="cs" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="EnvDTE" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+<# if(!string.IsNullOrEmpty(Model.ModelTypeNamespace)) { #>
+using <#= Model.ModelTypeNamespace #>;
+<# } #>
+using <#= Model.RepositoriesNamespace #>;
+using <#= Model.RepositoryInterfacesNamespace #>;
+using <#= Model.ViewModelsNamespace #>;
+using Customer.Project.Utilities.Web.Paging;
+
+namespace <#= Model.ControllerNamespace #>
+{   
+<#  
+	var modelType = (CodeType)Model.ModelType; 
+	var modelName = modelType.Name; 
+	var modelNamePlural = Model.ModelTypePluralized; 
+	var modelVariable = modelName.ToLower(); 
+	var relatedEntities = ((IEnumerable)Model.RelatedEntities).OfType<RelatedEntityInfo>();
+	var primaryKeyProperty = modelType.VisibleMembers().OfType<CodeProperty>().Single(x => x.Name == Model.PrimaryKey);
+	var routingName = Regex.Replace(Model.ControllerName, "Controller$", "", RegexOptions.IgnoreCase);
+#>
+    public partial class <#= Model.ControllerName #> : BaseController
+    {
+<# foreach(var repository in Repositories.Values) { #>
+		private readonly I<#= repository.RepositoryTypeName #> _<#= repository.VariableName #>;
+<# } #>
+        private const int _pageSize = 10;
+
+		// If you are not using Dependency Injection, uncomment the following constructor
+        //public <#= Model.ControllerName #>() : this(<#= String.Join(", ", Repositories.Values.Select(x => "new " + x.RepositoryTypeName + "()")) #>)
+        //{ }
+
+        public <#= Model.ControllerName #>(<#= String.Join(", ", Repositories.Values.Select(x => "I" + x.RepositoryTypeName + " " + x.VariableName)) #>)
+        {
+<# foreach(var repository in Repositories.Values) { #>
+			this._<#= repository.VariableName #> = <#= repository.VariableName #>;
+<# } #>
+        }
+
+        //
+        // GET: /<#= routingName #>/
+
+        public ViewResult Index(int page = 1)
+        {
+<#
+	var propertiesToInclude = relatedEntities.Select(relation => relation.LazyLoadingProperty).Where(x => x != null);
+	var includeExpression = String.Join(", ", propertiesToInclude.Select(x => String.Format("{0} => {0}.{1}", modelVariable, x.Name)));
+	if (!string.IsNullOrEmpty(includeExpression)) {
+		includeExpression = "Including(" + includeExpression + ")";
+	}
+#>
+           var all<#= modelNamePlural #> = _<#= Repositories[modelType.FullName].VariableName #>.All<#= includeExpression #>;
+
+            PagingInfo pagingInfo = new PagingInfo()
+                             {
+                                 CurrentPage = page,
+                                 ItemsPerPage = _pageSize,
+                                 TotalItems = all<#= modelNamePlural #>.Count()
+                             };
+            pagingInfo.EnsureValidCurrentPage();
+			
+           <#= modelName #>ListViewModel listModel = new <#= modelName #>ListViewModel()
+                                                {
+                                                    PagingInfo = pagingInfo,
+                                                    <#= modelNamePlural #> = all<#= modelNamePlural #>
+                                                        .OrderBy(p => p.Id)
+                                                        .Skip((pagingInfo.CurrentPage - 1) * _pageSize)
+                                                        .Take(_pageSize)
+                                                };
+																								
+			return View(listModel);
+        }
+		
+		//
+        // GET: /<#= routingName #>/Details/5        
+        public ActionResult Details(<#= primaryKeyProperty.Type.AsString #> id)
+        {
+            var <#= modelVariable #> = _<#= Repositories[modelType.FullName].VariableName #>.Find(id);
+
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("DetailsPart", <#= modelVariable #>);
+            }
+            return View(<#= modelVariable #>);
+        }
+		
+        //
+        // GET: /<#= routingName #>/Create
+
+        public ActionResult Create()
+        {
+			<#= modelName #>CreateEditViewModel createEditModel = new <#= modelName #>CreateEditViewModel(new <#= modelName #>());
+			
+<# foreach(var relatedEntity in relatedEntities.Where(x => x.RelationType == RelationType.Parent)) { #>
+            createEditModel.Possible<#= relatedEntity.RelationNamePlural #> = _<#= Repositories[relatedEntity.RelatedEntityType.FullName].VariableName #>.All;
+<# } #>
+
+            return View(createEditModel);
+        } 
+
+        //
+        // POST: /<#= routingName #>/Create
+
+		[ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult Create(<#= modelName #>CreateEditViewModel createEditModel)
+        {
+			try
+			{
+	            if (ModelState.IsValid) 
+				{
+	                _<#= Repositories[modelType.FullName].VariableName #>.InsertOrUpdate(createEditModel.<#= modelName #>);
+	                _<#= Repositories[modelType.FullName].VariableName #>.Save();
+	                return RedirectToAction("Index");
+	            } 
+				else 
+				{
+	<# foreach(var relatedEntity in relatedEntities.Where(x => x.RelationType == RelationType.Parent)) { #>
+	            createEditModel.Possible<#= relatedEntity.RelationNamePlural #> = _<#= Repositories[relatedEntity.RelatedEntityType.FullName].VariableName #>.All;
+	<# } #>
+					return View(createEditModel);
+				}
+			}
+			catch(Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, string.Format("Create item failed ({0}).", ex.ToFullException()));				
+	<# foreach(var relatedEntity in relatedEntities.Where(x => x.RelationType == RelationType.Parent)) { #>            
+				if (createEditModel.Possible<#= relatedEntity.RelationNamePlural #> == null)
+                {
+                    createEditModel.Possible<#= relatedEntity.RelationNamePlural #> = _<#= Repositories[relatedEntity.RelatedEntityType.FullName].VariableName #>.All;
+                }
+	<# } #>	
+                return View(createEditModel);
+            }
+		
+        }
+        
+        //
+        // GET: /<#= routingName #>/Edit/5
+ 
+        public ActionResult Edit(<#= primaryKeyProperty.Type.AsString #> id)
+        {
+			<#= modelName #> <#= modelVariable #> = _<#= Repositories[modelType.FullName].VariableName #>.Find(id);
+			<#= modelName #>CreateEditViewModel createEditModel = new <#= modelName #>CreateEditViewModel(<#= modelVariable #>);
+		
+<# foreach(var relatedEntity in relatedEntities.Where(x => x.RelationType == RelationType.Parent)) { #>
+            createEditModel.Possible<#= relatedEntity.RelationNamePlural #> = _<#= Repositories[relatedEntity.RelatedEntityType.FullName].VariableName #>.All;
+<# } #>
+			return View(createEditModel);
+        }
+
+        //
+        // POST: /<#= routingName #>/Edit/5
+
+		[ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult Edit(<#= modelName #>CreateEditViewModel createEditModel)
+        {
+			try
+			{
+	            if (ModelState.IsValid) 
+				{
+	                _<#= Repositories[modelType.FullName].VariableName #>.InsertOrUpdate(createEditModel.<#= modelName #>);
+	                _<#= Repositories[modelType.FullName].VariableName #>.Save();
+	                return RedirectToAction("Index");
+	            } 
+				else 
+				{
+	<# foreach(var relatedEntity in relatedEntities.Where(x => x.RelationType == RelationType.Parent)) { #>
+	            	createEditModel.Possible<#= relatedEntity.RelationNamePlural #> = _<#= Repositories[relatedEntity.RelatedEntityType.FullName].VariableName #>.All;
+	<# } #>
+					return View(createEditModel);
+				}
+			}
+			catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, string.Format("Save item failed ({0}).", ex.ToFullException()));
+<# foreach(var relatedEntity in relatedEntities.Where(x => x.RelationType == RelationType.Parent)) { #>            
+				if (createEditModel.Possible<#= relatedEntity.RelationNamePlural #> == null)
+                {
+                    createEditModel.Possible<#= relatedEntity.RelationNamePlural #> = _<#= Repositories[relatedEntity.RelatedEntityType.FullName].VariableName #>.All;
+                }
+	<# } #>	
+                return View(createEditModel);
+            }
+        }
+
+        //
+        // GET: /<#= routingName #>/Delete/5
+ 
+        public ActionResult Delete(<#= primaryKeyProperty.Type.AsString #> id)
+        {
+            return View(_<#= Repositories[modelType.FullName].VariableName #>.Find(id));
+        }
+
+        //
+        // POST: /<#= routingName #>/Delete/5
+		[ValidateAntiForgeryToken]
+        [HttpPost, ActionName("Delete")]
+        public ActionResult DeleteConfirmed(<#= primaryKeyProperty.Type.AsString #> id)
+        {
+			try
+			{
+				_<#= Repositories[modelType.FullName].VariableName #>.Delete(id);
+            	_<#= Repositories[modelType.FullName].VariableName #>.Save();
+				return RedirectToAction("Index");
+			}
+			catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, string.Format("Delete item failed ({0}).", ex.ToFullException()));
+                return View(_<#= Repositories[modelType.FullName].VariableName #>.Find(id));
+            }
+        }
+    }
+}
+
+<#+
+class RepositoryInfo {
+    public string RepositoryTypeName { get; set; }
+    public string VariableName { get; set; }
+}
+
+IDictionary<string, RepositoryInfo> _repositories;
+IDictionary<string, RepositoryInfo> Repositories {
+	get {
+		if (_repositories == null) {
+			var relatedEntities = ((IEnumerable)Model.RelatedEntities).OfType<RelatedEntityInfo>();
+			var relatedTypes = relatedEntities.Where(x => x.RelationType == RelationType.Parent).Select(x => x.RelatedEntityType).Distinct();
+			_repositories = relatedTypes.ToDictionary(
+				relatedType => relatedType.FullName,
+				relatedType => new RepositoryInfo { RepositoryTypeName = relatedType.Name + "Repository", VariableName = relatedType.Name.ToLower() + "Repository" }
+			); 
+			_repositories[((CodeType)Model.ModelType).FullName] = new RepositoryInfo { RepositoryTypeName = Model.Repository, VariableName = ((CodeType)Model.ModelType).Name.ToLower() + "Repository" };
+		}
+		return _repositories;
+	}
+}
+#>

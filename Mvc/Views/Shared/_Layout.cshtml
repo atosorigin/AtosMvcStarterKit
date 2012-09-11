@@ -1,0 +1,73 @@
+@using StackExchange.Profiling
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>@ViewBag.Title - MVC Web Application</title>
+        
+        <meta charset="utf-8" />
+        <meta name="description" content="MVC Application Template Website">
+        <meta name="author" content="Alexander van Trijffel">
+        <meta name="application-name" content="MVC Web Application" />
+        <meta name="msapplication-tooltip" content="MVC Web Application" />
+        <meta name="msapplication-starturl" content="@Url.Content("~/Home/Index")" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width" />
+        <!-- In IE9, drag the icon of the site to the task bar to create a jump list with the following items: -->
+        <meta name="msapplication-task" content="name=Home; action-uri=@Url.Content("~/Home/Index"); icon-uri=@Url.Content("~/favicon.ico")" />
+        <meta name="msapplication-task" content="name=Contact; action-uri=@Url.Content("~/Home/Contact"); icon-uri=@Url.Content("~/favicon.ico")" />
+        <meta name="msapplication-task" content="name=About; action-uri=@Url.Content("~/Home/About"); icon-uri=@Url.Content("~/favicon.ico")" />
+        
+        <link rel="apple-touch-icon" href="@Url.Content("~/apple-touch-icon.png")">
+        <link rel="apple-touch-icon" sizes="72x72" href="@Url.Content("~/apple-touch-icon-72x72.png")" />
+        <link rel="apple-touch-icon" sizes="114x114" href="@Url.Content("~/apple-touch-icon-114x114.png")" />
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+
+        <script type="text/javascript">
+            // set rootUrl for usage in javascript files
+            rootUrl = '@Url.Content("~/")';
+        </script>
+		@Styles.Render("~/Content/css")
+        @Scripts.Render("~/bundles/modernizr")
+		@Scripts.Render("~/bundles/common")
+
+        <!--[if lte IE 7]>
+            <style type="text/css">
+                html .jqueryslidemenu{height: 1%;} /*Holly Hack for IE7 and below*/
+            </style>
+        <![endif]-->    
+        
+        @MiniProfiler.RenderIncludes()
+    </head>
+    <body>
+        <header>
+            <div class="content-wrapper">
+                <div class="float-left">
+                    <p class="site-title">@Html.ActionLink("your logo here", "Index", "Home")</p>
+                </div>
+                <div class="float-right">
+                    <section id="login">
+                        @Html.Partial("_LoginPartial")
+                    </section>
+                    <nav>
+                       @Html.Menu()
+                    </nav>
+                </div>
+            </div>
+        </header>
+        <div id="body">
+            @RenderSection("featured", required: false)
+            <section class="content-wrapper main-content clear-fix">
+                @RenderBody()
+            </section>
+        </div>
+        <footer>
+            <div class="content-wrapper">
+                <div class="float-left">
+                    <p>&copy; @DateTime.Now.Year - My ASP.NET MVC Application  - Version @Html.ApplicationVersion()</p>
+                </div>
+            </div>
+        </footer>
+
+        @RenderSection("scripts", required: false)
+</body>
+</html>

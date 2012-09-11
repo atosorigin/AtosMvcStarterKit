@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+    <siteMapNode title="Main menu" roles="*"  description="Main menu">
+        <siteMapNode url="~/Home/Index" title="Home" roles="*" description="Home" />
+      <siteMapNode url="~/Home/Contact" title="Contact" roles="*" description="Contact">
+        <siteMapNode url="~/Home/Index/1" title="Home1" roles="*" description="Home" />
+        <siteMapNode url="~/Home/Index/2" title="Home2" roles="*" description="Home">
+          <siteMapNode url="~/Home/Index/2_1" title="Home2.1" roles="*" description="Home" />
+        </siteMapNode>
+      </siteMapNode>      
+      <siteMapNode url="~/Home/About" title="About" roles="*" description="About" />
+      <siteMapNode url="~/Home/About/1" title="About" roles="*" description="About" />
+      <siteMapNode url="~/Home/About/2" title="About" roles="*" description="About" />
+
+      <!-- Example of a menu item that is only accessible for users with a given Role (administrator)-->
+      <siteMapNode url="~/Admin/Index" title="Admin" roles="Administrator" description="Admin" />
+    </siteMapNode>
+</siteMap>

@@ -1,0 +1,28 @@
+﻿<#@ Template Language="C#" HostSpecific="True" Inherits="DynamicTransform" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="EnvDTE" #>
+<#@ Output Extension="cs" #>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using <#= Model.ModelTypeNamespace #>;
+using Customer.Project.Utilities.Web.Paging;
+
+<# 
+    var modelType = (CodeType)Model.ModelType; 
+    var modelName = modelType.Name;
+	var modelVariableName = modelType.Name.ToLower();
+	var relatedEntities = ((IEnumerable)Model.RelatedEntities).OfType<RelatedEntityInfo>();
+#>
+
+namespace <#= Model.Namespace #>
+{ 
+    public class <#= Model.ViewModelName #> : ViewModelBase
+    {
+		public IEnumerable<<#= modelName #>> <#= Model.ModelTypePluralized #>  { get; set; }
+		public PagingInfo PagingInfo { get; set; }
+	}
+}

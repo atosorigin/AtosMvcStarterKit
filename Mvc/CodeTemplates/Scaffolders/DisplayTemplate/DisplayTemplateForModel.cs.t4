@@ -1,0 +1,154 @@
+﻿<#@ Template Language="C#" HostSpecific="True" Inherits="DynamicTransform" #>
+<#@ Output extension="cshtml" #>
+<#@ assembly name="System.ComponentModel.DataAnnotations" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data.Entity" #>
+<#@ assembly name="System.Data.Linq" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.ComponentModel.DataAnnotations" #>
+<#@ import namespace="System.Data.Linq.Mapping" #>
+<#@ import namespace="System.Data.Objects.DataClasses" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Reflection" #>
+<#@ import namespace="EnvDTE" #>
+<# 
+	var viewDataType = (EnvDTE.CodeType) Model.ViewDataType; 
+#>
+<# if(viewDataType != null) { #>
+@model <#= viewDataType.FullName #>
+<# } #>
+    <tr>
+<#  
+List<ModelProperty> properties = GetModelProperties(Model.ViewDataType, true);
+bool first = true;
+for (int i=0 ; i <properties.Count ; i++) {
+    if (!properties[i].IsPrimaryKey && !properties[i].IsForeignKey) {
+#>
+        <td>
+<#
+		if (first) {
+			first = false;
+			string postfix = string.Empty;
+			if (!properties[i].Type.UnderlyingTypeIs<string>())
+				postfix = ".ToString()";
+			if (!String.IsNullOrEmpty(Model.PrimaryKeyName)) {
+#>
+            @Html.ActionLink(@Model.<#= properties[i].ValueExpression #><#= postfix #>, "Details", new { id=Model.<#= Model.PrimaryKeyName #> })
+<#
+			} else {
+#>
+            @Html.ActionLink(@Model.<#= properties[i].ValueExpression #><#= postfix #>, "Details", new { /* id=Model.PrimaryKey */ })
+<#
+			}
+		} else {	
+#>
+			@<#= properties[i].ValueExpression #>
+<#
+		}	
+#>
+        </td>
+<#
+    }
+}
+#>
+		<td>
+<# if (!String.IsNullOrEmpty(Model.PrimaryKeyName)) { #>
+            @Html.ActionLink("Edit", "Edit", new { id=Model.<#= Model.PrimaryKeyName #> }) 
+            @Html.ActionLink("Delete", "Delete", new { id=Model.<#= Model.PrimaryKeyName #> })
+<# } 
+   else 
+   { #>
+            @Html.ActionLink("Edit", "Edit", new { /* id=Model.PrimaryKey */ }) 
+            @Html.ActionLink("Delete", "Delete", new { /* id=Model.PrimaryKey */ })
+        
+<# } #>
+		</td>
+	</tr>
+
+<#+
+// Describes the information about a property on the model
+class ModelProperty {
+    public string Name { get; set; }
+    public string ValueExpression { get; set; }
+	public EnvDTE.CodeTypeRef Type { get; set; }
+    public bool IsPrimaryKey { get; set; }
+	public bool IsForeignKey { get; set; }
+	public bool IsReadOnly { get; set; }
+}
+
+// Change this list to include any non-primitive types you think should be eligible to be edited using a textbox
+static Type[] bindableNonPrimitiveTypes = new[] {
+    typeof(string),
+    typeof(decimal),
+    typeof(Guid),
+    typeof(DateTime),
+    typeof(DateTimeOffset),
+    typeof(TimeSpan),
+};
+
+// Call this to get the list of properties in the model. Change this to modify or add your
+// own default formatting for display values.
+List<ModelProperty> GetModelProperties(EnvDTE.CodeType typeInfo, bool includeUnbindableProperties) {
+    List<ModelProperty> results = GetEligibleProperties(typeInfo, includeUnbindableProperties);
+    
+    foreach (ModelProperty prop in results) {
+        /*if (prop.Type.UnderlyingTypeIs<double>() || prop.Type.UnderlyingTypeIs<decimal>()) {
+            prop.ValueExpression = "String.Format(\"{0:F}\", " + prop.ValueExpression + ")";
+        }
+        else if (prop.Type.UnderlyingTypeIs<DateTime>()) {
+            prop.ValueExpression = "String.Format(\"{0:g}\", " + prop.ValueExpression + ")";
+        }*/
+		// cannot bind and supports count?
+		if (!IsBindableType(prop.Type) && ((EnvDTE.CodeType)prop.Type.CodeType).FindProperty("Count") != null) { 
+		//	prop.ValueExpression = GetValueExpression(prop.Name, (EnvDTE.CodeType)prop.Type.CodeType);
+			
+			prop.ValueExpression = String.Format("(Model.{0} == null ? \"None\" : Model.{0}.Count.ToString())", prop.Name);
+		}
+    }
+
+    return results;
+}
+// Helper
+List<ModelProperty> GetEligibleProperties(EnvDTE.CodeType typeInfo, bool includeUnbindableProperties) {
+    List<ModelProperty> results = new List<ModelProperty>();
+	if (typeInfo != null) {
+		bool first = true;
+		foreach (var prop in typeInfo.VisibleMembers().OfType<EnvDTE.CodeProperty>()) {
+			if (prop.IsReadable() && !prop.HasIndexParameters() && (includeUnbindableProperties || IsBindableType(prop.Type))) {
+				ModelProperty modelProperty = new ModelProperty {
+					Name = prop.Name,
+					Type = prop.Type,
+					IsPrimaryKey = Model.PrimaryKeyName == prop.Name,
+					IsForeignKey = ParentRelations.Any(x => x.RelationProperty == prop),
+					IsReadOnly = !prop.IsWriteable()
+				};
+				if (first && Model.PrimaryKeyName != prop.Name && !ParentRelations.Any(x => x.RelationProperty == prop)) {
+					// first displayed value is displayed as action link
+					modelProperty.ValueExpression = prop.Name;
+					first = false;
+				}
+				else 
+				{
+					// others are displayed using display for
+					modelProperty.ValueExpression = String.Format("Html.DisplayFor(m => m.{0})", prop.Name);
+				}				
+					
+				results.Add(modelProperty);
+			}
+		}
+	}
+
+    return results;
+}
+
+IEnumerable<RelatedEntityInfo> ParentRelations {
+	get { return ((IEnumerable)Model.RelatedEntities).OfType<RelatedEntityInfo>().Where(x => x.RelationType == RelationType.Parent); }
+}
+
+// Helper
+bool IsBindableType(EnvDTE.CodeTypeRef type) {
+    return type.UnderlyingIsPrimitive() || bindableNonPrimitiveTypes.Any(x => type.UnderlyingTypeIs(x));
+}
+#>

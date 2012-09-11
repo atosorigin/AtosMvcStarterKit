@@ -1,0 +1,14 @@
+﻿@model ActionResultMessageViewModel
+
+@{
+    ViewBag.Title = Model.Title;
+}
+
+<h2>@Model.Title</h2>
+@Html.ValidationSummary(false)
+<p>@Model.Message</p>
+<br/>
+@if (Model.ShowBackButton)
+{
+    <a href="@(string.IsNullOrEmpty(Model.ReturnUrl) ? "javascript: history.go(-1)" : Url.Content(Model.ReturnUrl))">@Model.BackLinkTitle</a>   
+}

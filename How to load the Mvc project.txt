@@ -1,0 +1,4 @@
+If the Mvc project cannot be opened because Visual Studio does not recognize the project type, install ASP.NET MVC 4 from http://www.asp.net/mvc/mvc4
+
+Alexander van Trijffel
+29-8-2012
