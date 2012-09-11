@@ -5,7 +5,7 @@ The Atos MVC Starter Kit is a project template for turbo boosting the creation o
 
 The Starter Kit is designed for creating new Web applications and SOA service applications. It offers a broad set 
 of reusable functionality. This lowers the chance that for each new project wheels have to be reinvented over and 
-over again. In addition, the Start Kit features code generation of Repositorories, Controllers and Views to optimize
+over again. In addition, the Start Kit features code generation of Repositories, Controllers and Views to optimize
 productivity.
 
 The Atos MVC Starter Kit is an important component of the Samoa software factory, the software factory of Atos.
@@ -24,6 +24,7 @@ Web development
 - Editor Templates for HTML5 types
 - ActionResultMessage for displaying simple messages to the user
 - Logging of all unhandled exceptions for all web requests and Web Api requests
+- PreWarmCache support
 - Web setup project is included
 
 Instrumentation
@@ -33,10 +34,8 @@ Instrumentation
 - Error reporting, extended error page
 - Inversion of Control container initialization (StructureMap)
 - Configuration of IoC container for resolving MVC and MVC Web API components
-- Design by contract with the Check class
-- PreWarmCache support
+- Design by contract with the AtosComponents Check class
 - RoleAuthorization attribute for authorization on actions based on role membership
- 
 - Preconfigured FxCop ruleset with Atos standards
 
 Database
