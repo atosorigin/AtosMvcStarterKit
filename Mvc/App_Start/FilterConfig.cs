@@ -1,7 +1,7 @@
 ﻿using System.Web.Mvc;
 using AtosOrigin.NetLibrary.Components.Core;
 using Customer.Project.Application;
-using Customer.Project.Mvc.Instrumentation.Elmah;
+using Customer.Project.Mvc.Instrumentation.ElmahHandlers;
 using Customer.Project.Utilities;
 
 namespace Customer.Project.Mvc.App_Start

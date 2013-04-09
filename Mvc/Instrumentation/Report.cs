@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Web;
 using System.Web.Mvc;
 using Customer.Project.Application;
+using Customer.Project.Mvc.Controllers;
+using Customer.Project.Mvc.Instrumentation.Security;
 using Customer.Project.Utilities;
 using Elmah;
 
@@ -17,39 +19,57 @@ namespace Customer.Project.Mvc.Instrumentation
             Trace.WriteLine(errorDescription);
             ErrorSignal.FromCurrentContext().Raise(new Exception(errorDescription));
         }
-        public static void Error(ModelStateDictionary modelState, string errorDescription)
+
+        /// <summary>
+        /// Logs error to IFormatLogger and Elmah
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <param name="prefix"></param>
+        /// <param name="formatStringParameters"></param>
+        public static void LogInfo(Exception ex, string prefix, params object[] formatStringParameters)
+        {
+            _logger.Info(ex, prefix, formatStringParameters);
+
+            //ErrorSignal.FromCurrentContext().Raise(ex);
+        }
+
+        /// <summary>
+        /// Logs error to IFormatLogger and Elmah and adds a non descriptive error message to the modelstate
+        /// </summary>
+        public static void Error(BaseController controller, string errorDescription)
         {
             LogAndRaiseErrorImplementation(errorDescription);
-            if (modelState != null)
-                modelState.AddModelError("", errorDescription);
+            if (controller.ModelState != null)
+                controller.ModelState.AddModelError(String.Empty
+                    , string.Format("Ooops, something whent wrong. {0}. The administrator has been notified. ", errorDescription));
         }
-        public static void Error(ModelStateDictionary modelState, Exception ex, string prefix, params object[] formatStringParameters)
+        /// <summary>
+        /// Logs error to IFormatLogger and Elmah and adds a non descriptive error message to the modelstate
+        /// </summary>
+        public static void Error(BaseController controller, Exception ex, string prefix, params object[] formatStringParameters)
         {
             _logger.Error(ex, prefix, formatStringParameters);
 
             ErrorSignal.FromCurrentContext().Raise(ex);
-
-            if (modelState != null)
-                modelState.AddModelError("", String.Format(prefix, formatStringParameters) + ex.Message);
-        }
-        public static void ReportError(this Controller controller, Exception ex, string messageFormatString, params object[] formatStringParameters)
-        {
-            string formattedMessage = String.Format(messageFormatString, formatStringParameters);
-            Error(controller.ModelState, ex, formattedMessage);
-        }
-
-        public static void ReportError(this Controller controller, string messageFormatString, params object[] formatStringParameters)
-        {
-            string formattedMessage = String.Format(messageFormatString, formatStringParameters);
-            Error(controller.ModelState, formattedMessage);
+            string message = String.Format(prefix, formatStringParameters);
+            string error =
+                string.Format("Ooops, something whent wrong. {0}. The administrator has been notified. ", message);
+            if (controller.ModelState != null)
+            {
+                controller.ModelState.AddModelError(String.Empty, error);
+            }
+            else
+            {
+                controller.ViewBag.Message = error;
+            }
         }
 
-        private static void LogAndRaiseAuthorizationError(Controller controller)
+        private static void LogAndRaiseAuthorizationError(BaseController controller)
         {
             LogAndRaiseErrorImplementation(string.Format("Access to page '{0}' is denied for user {1})"
-               , controller.Request.Url, LoggedOnUser.UserName));
+                , controller.Request.Url, controller.User.Identity.IsAuthenticated ? controller.User.Identity.Name : "?"));
         }
-        public static void ReportAuthorizationError(this Controller controller)
+        public static void ReportAuthorizationError(this BaseController controller)
         {
             LogAndRaiseAuthorizationError(controller);
 
@@ -61,7 +81,7 @@ namespace Customer.Project.Mvc.Instrumentation
             controller.Response.End();
         }
 
-        public static object ReturnJsonAuthorizationError(this Controller controller)
+        public static object ReturnJsonAuthorizationError(this BaseController controller)
         {
             LogAndRaiseAuthorizationError(controller);
             return new { ResultText = "You are not authorized for the requested action, please contact the system administrator." };

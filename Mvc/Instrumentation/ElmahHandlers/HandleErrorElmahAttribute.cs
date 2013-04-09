@@ -5,12 +5,12 @@ using AtosOrigin.NetLibrary.Components.Core;
 using Customer.Project.Utilities;
 using Elmah;
 
-namespace Customer.Project.Mvc.Instrumentation.Elmah
+namespace Customer.Project.Mvc.Instrumentation.ElmahHandlers
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class HandleErrorElmahAttribute : HandleErrorAttribute
     {
-        private readonly IFormatLogger _logger;
+        public IFormatLogger _logger { get; set; }
         public HandleErrorElmahAttribute(IFormatLogger logger)
         {
             Check.RequireNotNull(logger);
@@ -25,11 +25,11 @@ namespace Customer.Project.Mvc.Instrumentation.Elmah
         }
         public override void OnException(ExceptionContext filterContext)
         {
-            base.OnException(filterContext);
+            //base.OnException(filterContext);
 
             var e = filterContext.Exception;
-            if (filterContext.ExceptionHandled)   // if unhandled, will be logged anyhow
-                return;
+            //if (filterContext.ExceptionHandled)   // if unhandled, will be logged anyhow
+            //    return;
 
             if (!filterContext.HttpContext.Items.Contains("LoggerBinding"))
             {

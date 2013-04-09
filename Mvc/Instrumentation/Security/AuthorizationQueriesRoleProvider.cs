@@ -9,12 +9,11 @@ namespace Customer.Project.Mvc.Instrumentation.Security
         public AuthorizationQueriesRoleProvider()
         {
         }
-
         public override string[] GetRolesForUser(string username)
         {
             // Todo: retrieve your custom roles here. Example:
             //string[] roles = MvcApplication.UserQueries.GetRolesForUser(username);
-            return new string[] {};
+            return new string[] { };
         }
 
         public override bool IsUserInRole(string username, string roleName)

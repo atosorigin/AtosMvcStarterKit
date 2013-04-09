@@ -5,6 +5,7 @@ namespace Customer.Project.Utilities
     public interface IFormatLogger
     {
         void Info(string messageFormatString, params object[] formatStringParameters);
+        void Info(Exception ex, string messageFormatString, params object[] formatStringParameters);
         void Warn(string messageFormatString, params object[] formatStringParameters);
         void Debug(string messageFormatString, params object[] formatStringParameters);
         void Error(string messageFormatString, params object[] formatStringParameters);

@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using Wwp.Application;
-using Wwp.Utilities;
-using Elmah;
-using StructureMap.Attributes;
+using Customer.Project.Application;
+using Customer.Project.Mvc.Instrumentation;
+using Customer.Project.Utilities;
 
 namespace Wwp.Mvc.Instrumentation
 {
@@ -29,11 +26,9 @@ namespace Wwp.Mvc.Instrumentation
             get { return _logLevel; }
             set { _logLevel = value; }
         }
-
         public LogApiRequestAttribute()
         {
         }
-
         private void LogStart(HttpActionContext actionContext)
         {
             // only log when the modelstate is valid
@@ -49,24 +44,10 @@ namespace Wwp.Mvc.Instrumentation
                 ServiceLocator.GetExisting<IFormatLogger>().Log(this.LogLevel, message);
             }
         }
-
-        //private void LogError(HttpActionExecutedContext context)
-        //{
-        //    Logger.Error(context.Exception
-        //        , "Error in LogRequest action filter. " + RequestDetailsParser.GetRequestProperties((context.Request.Properties["MS_HttpContext"] as HttpContextWrapper).Request));
-
-        //    // throw generic error
-        //    ErrorSignal.FromCurrentContext().Raise(context.Exception);
-        //}
         public override void OnActionExecuting(System.Web.Http.Controllers.HttpActionContext actionContext)
         {
             LogStart(actionContext);
             base.OnActionExecuting(actionContext);
         }
-
-        //public Task ExecuteExceptionFilterAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
-        //{
-        //    LogError(actionExecutedContext);
-        //}
     }
 }

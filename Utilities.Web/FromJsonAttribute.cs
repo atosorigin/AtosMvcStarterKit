@@ -5,7 +5,7 @@ namespace Customer.Project.Utilities.Web
 {
     public class FromJsonAttribute : CustomModelBinderAttribute
     {
-        private readonly static JavaScriptSerializer serializer = new JavaScriptSerializer();
+        private readonly static JavaScriptSerializer _serializer = new JavaScriptSerializer();
 
         public override IModelBinder GetBinder()
         {
@@ -19,7 +19,7 @@ namespace Customer.Project.Utilities.Web
                 var stringified = controllerContext.HttpContext.Request[bindingContext.ModelName];
                 if (string.IsNullOrEmpty(stringified))
                     return null;
-                return serializer.Deserialize(stringified, bindingContext.ModelType);
+                return _serializer.Deserialize(stringified, bindingContext.ModelType);
             }
         }
     }

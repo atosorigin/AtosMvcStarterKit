@@ -3,7 +3,7 @@ using System.Web.Http.Filters;
 using Customer.Project.Utilities;
 using Elmah;
 
-namespace Customer.Project.Mvc.Instrumentation.Elmah
+namespace Customer.Project.Mvc.Instrumentation.ElmahHandlers
 {
     public class HandleWebApiErrorElmahAttribute : ExceptionFilterAttribute
     {
@@ -23,7 +23,7 @@ namespace Customer.Project.Mvc.Instrumentation.Elmah
                             , actionExecutedContext.ActionContext.ActionDescriptor.ActionName
                             , actionExecutedContext.ActionContext.ControllerContext.Controller.GetType().Name
                             , RequestDetailsParser.GetRequestProperties(request)
-                            , request ));
+                            , request));
 
                 ErrorSignal.FromCurrentContext().Raise(actionExecutedContext.Exception);
             }

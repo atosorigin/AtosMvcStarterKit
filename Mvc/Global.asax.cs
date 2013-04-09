@@ -10,7 +10,7 @@ using AtosOrigin.NetLibrary.Components.Core;
 using Customer.Project.Application;
 using Customer.Project.Mvc.App_Start;
 using Customer.Project.Mvc.Instrumentation;
-using Customer.Project.Mvc.Instrumentation.Elmah;
+using Customer.Project.Mvc.Instrumentation.ElmahHandlers;
 using Customer.Project.Utilities;
 using Customer.Project.Utilities.Web;
 using Elmah;

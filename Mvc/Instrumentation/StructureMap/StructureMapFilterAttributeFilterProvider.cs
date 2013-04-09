@@ -15,7 +15,7 @@ public class StructureMapFilterAttributeFilterProvider : FilterAttributeFilterPr
 
         foreach (var attribute in attributes)
         {
-            _container.BuildUp(attributes);
+            _container.BuildUp(attribute);
         }
         return attributes;
     }

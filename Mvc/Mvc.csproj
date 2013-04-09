@@ -247,11 +247,12 @@
     <Compile Include="HtmlHelpers\ApplicationVersion.cs" />
     <Compile Include="HtmlHelpers\UrlHelperExtensions.cs" />
     <Compile Include="Instrumentation\AjaxException.cs" />
-    <Compile Include="Instrumentation\Elmah\HandleWebApiErrorElmahAttribute.cs" />
+    <Compile Include="Instrumentation\ElmahHandlers\HandleWebApiErrorElmahAttribute.cs" />
+    <Compile Include="Instrumentation\LogApiRequestAttribute.cs" />
     <Compile Include="Instrumentation\LogRequestAttribute.cs" />
     <Compile Include="Instrumentation\RequestDetailsParser.cs" />
     <Compile Include="Instrumentation\Security\AuthorizationQueriesRoleProvider.cs" />
-    <Compile Include="Instrumentation\Elmah\HandleErrorElmahAttribute.cs" />
+    <Compile Include="Instrumentation\ElmahHandlers\HandleErrorElmahAttribute.cs" />
     <Compile Include="HtmlHelpers\HtmlTabMenuMvc.cs" />
     <Compile Include="Instrumentation\Security\AuthorizedXmlSiteMapProvider.cs" />
     <Compile Include="Instrumentation\Security\LoggedOnUser.cs" />
@@ -273,7 +274,6 @@
     <Content Include="apple-touch-icon-72x72.png" />
     <Content Include="apple-touch-icon.png" />
     <Content Include="App_Data\aspnetdb.mdf" />
-    <Content Include="App_Readme\Elmah.txt" />
     <Content Include="Content\jqueryslidemenu.css" />
     <Content Include="Content\mobile.css" />
     <Content Include="Content\reset.css" />

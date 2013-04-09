@@ -1,10 +1,9 @@
-using System.Web.Http;
 using System.Web.Mvc;
 using Customer.Project.Mvc.Models;
 
 namespace Customer.Project.Mvc.Controllers
 {
-	public abstract class BaseController : Controller
+    public abstract class BaseController : Controller
     {
         protected ActionResult ResultMessage(ActionResultMessageViewModel model)
         {

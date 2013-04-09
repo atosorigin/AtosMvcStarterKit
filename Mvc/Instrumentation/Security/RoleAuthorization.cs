@@ -9,14 +9,6 @@ namespace Customer.Project.Mvc.Instrumentation.Security
     public sealed class RoleAuthorizationAttribute : AuthorizeAttribute
     {
         public SystemRoles[] SystemRoles { get; set; }
-        public SystemRoles SystemRole
-        {
-            get { return this.SystemRoles[0]; }
-            set
-            {
-                this.SystemRoles = new SystemRoles[] { value };
-            }
-        }
 
         protected override bool AuthorizeCore(HttpContextBase httpContext)
         {
