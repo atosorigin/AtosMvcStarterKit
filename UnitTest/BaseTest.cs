@@ -40,7 +40,7 @@ namespace Customer.Project.UnitTest
                 _initialized = true;
             }
 
-            ServiceLocator.InitializeContainer(null);
+            ServiceLocator.InitializeContainer(null, false);
 
             // for each test start transaction
             if (UseNhibernate)

@@ -17,7 +17,7 @@ namespace Customer.Project.Application
     {
         public static IContainer Container { get { return ObjectFactory.Container; } }
 
-        public static void InitializeContainer(Action<IInitializationExpression> initializationExpressions)
+        public static void InitializeContainer(Action<IInitializationExpression> initializationExpressions, bool initializeDataAccess = true)
         {
             ObjectFactory.Initialize(container =>
             {
@@ -28,8 +28,11 @@ namespace Customer.Project.Application
                     // class/interface combination is added to the StructureMap IoC container.
                     cfg.TheCallingAssembly();
 #warning validate assembly name of DataAccess for StructureMap configuration
-                    cfg.Assembly("Customer.Project.DataAccess");
-                    cfg.Assembly("Customer.Project.DataAccessEF");
+                    if (initializeDataAccess)
+                    {
+                        cfg.Assembly("Customer.Project.DataAccess");
+                        cfg.Assembly("Customer.Project.DataAccessEF");    
+                    }
                     cfg.AssemblyContainingType(typeof(IBaseRepository<>));
                     cfg.AssemblyContainingType<RepositoryIntConvention>();
                     cfg.AssemblyContainingType<IFormatLogger>();
