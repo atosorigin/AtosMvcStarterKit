@@ -47,3 +47,5 @@ Code generation
 - Generation of ViewModels
 - Generation of List, Details, Delete, Create views
 - List views support paging
+
+Alexander van Trijffel
