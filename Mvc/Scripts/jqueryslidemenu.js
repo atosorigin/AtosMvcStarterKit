@@ -11,7 +11,7 @@
 
 //Specify full URL to down and right arrow images (23 is padding-right to add to top level LIs with drop downs):
 var arrowimages = { down: ['downarrowclass', rootUrl + 'Images/down.gif', 23], right: ['rightarrowclass', rootUrl + 'Images/right.gif'] };
-console.log('rootUrl: ' + rootUrl);
+//console.log('rootUrl: ' + rootUrl);
 var jqueryslidemenu = {
     animateduration: { over: 200, out: 100 }, //duration of slide in/ out animation, in milliseconds
 
